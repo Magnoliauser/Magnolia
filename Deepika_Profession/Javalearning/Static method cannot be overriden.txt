@@ -1,0 +1,41 @@
+ class Car{
+   
+   public static void start() {
+      
+      System.out.println("Car Start ");
+   }
+   public void stop() {
+      
+      System.out.println(" Car stop ");
+   }
+   public void refuel() {
+      
+      System.out.println("Car fuel ");
+   }
+}
+ class Main extends Car {
+   
+   
+   public static void start() {
+      
+      System.out.println("BMW Start ");
+   }
+   
+   public static void main(String[] args) {
+      Main b= new Main();
+      b.start();
+      Car.start();
+      Main.start();
+     
+      b.stop();
+      b.refuel();
+        Car a= new Main();
+        
+        a.start();
+     
+     
+      a.stop();
+      a.refuel();
+   }
+   
+}

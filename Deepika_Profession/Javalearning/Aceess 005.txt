@@ -1,0 +1,64 @@
+package ArcherAutomation.ArcherAutomation;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.testng.annotations.Test;
+import junit.framework.Assert;
+import pageObjects.HomePage;
+import pageObjects.LoginPage;
+import pageObjects.Logout;
+import pageObjects.PlanEntityPage;
+import pageObjects.ToolBarAppsButtonsLeftSection;
+import utils.BasicOperations;
+
+public class AccessTest_005 extends BaseTest {
+	@Test(retryAnalyzer =utils.TestListener.class)
+	public void access_Tests005() throws NoSuchAlgorithmException, InvalidKeySpecException, InterruptedException {
+	
+	LoginPage.login(driver, reporterUtil, "AuditManager2");
+	Thread.sleep(4000);
+	driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+	Assert.assertTrue(HomePage.clickAuditDropdown(driver, reporterUtil));
+	Assert.assertTrue(HomePage.verifyPlanningDisplayed(driver, reporterUtil));
+	Assert.assertTrue(HomePage.clickPlanningQuantity(driver, reporterUtil));
+	Thread.sleep(3000);
+	Assert.assertTrue(HomePage.clickPlanEntity(driver, reporterUtil));
+	Thread.sleep(2000);
+	BasicOperations.waitForFrametoBeavailable(0, driver);
+	PlanEntityPage.verifyEntityTableColumns(driver, reporterUtil, "Plan Entity ID");
+	PlanEntityPage.verifyEntityTableColumns(driver, reporterUtil, "Engagement Name");
+	PlanEntityPage.verifyEntityTableColumns(driver, reporterUtil, "Status");
+	PlanEntityPage.verifyEntityTableColumns(driver, reporterUtil, "Engagement Category");
+	PlanEntityPage.verifyEntityTableColumns(driver, reporterUtil, "Auditable Entities");
+	PlanEntityPage.verifyEntityTableColumns(driver, reporterUtil, "Related Audit Plan");
+	BasicOperations.waitForLoad(driver);
+	//Thread.sleep(9000);
+	//BasicOperations.waitForFrametoBeavailable(0, driver);
+	//PlanEntityPage.verifyEngagementCategory(driver, reporterUtil, "Audit");
+	//BasicOperations.waitForFrametoBeavailable(0, driver);
+	Thread.sleep(3000);
+	PlanEntityPage.checkStatus(driver, reporterUtil,"Scheduled");
+	PlanEntityPage.clickEntity(driver, reporterUtil);
+		Thread.sleep(2000);
+	ToolBarAppsButtonsLeftSection.verifyDisabledButtons(driver, reporterUtil, 
+										ToolBarAppsButtonsLeftSection.COPY,
+										ToolBarAppsButtonsLeftSection.EDIT,
+										ToolBarAppsButtonsLeftSection.DELETE);
+	
+	//ToolBarAppsButtonsLeftSection.clickButtonIncidentInvestigation(driver, reporterUtil, ToolBarAppsButtonsLeftSection.EDIT);
+	Thread.sleep(4000);
+	BasicOperations.waitForFrametoBeavailable(0, driver);
+	PlanEntityPage.verifyEngagemenDetailstDisplayed(driver, reporterUtil);
+	//
+	
+	Thread.sleep(3000);
+	driver.switchTo().defaultContent();
+	Thread.sleep(3000);
+	Logout.clickButtonLogout(driver, reporterUtil, "TEST");
+	Thread.sleep(3000);
+
+	}
+	
+}

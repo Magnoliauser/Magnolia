@@ -1,0 +1,225 @@
+Constructor: Refer  Java tpoint,w3school,tutorialpoint
+https://www.tutorialspoint.com/are-multiple-constructors-possible-in-java
+
+https://www.tutorialspoint.com/how-to-call-the-constructor-of-a-superclass-from-a-constructor-in-java
+
+
+class Main{  
+    int id;  
+    String name;  
+    int age;  
+    
+    Main(int i,String n){  
+    id = i;  
+    name = n;  
+    }  
+      
+    Main(int i,String n,int a){  
+    id = i;  
+    name = n;  
+    age=a;  
+    }  
+    Main(){
+        id=1;
+        name ="deep";
+        age=10;
+    } 
+    // or can give default as zero to all the variables Main(){}  .when called display zero or null
+    void display(){System.out.println(id+" "+name+" "+age);}  
+   
+    public static void main(String args[]){  
+    Main s1 = new Main(111,"Karan");  
+    Main s2 = new Main(222,"Aryan",25);
+    Main s3 = new Main();
+    System.out.println(s3.id+" "+s3.name+" "+s3.age);
+    
+    s1.display();  
+    s2.display();  
+   }  
+}  
+
+
+class Animal{  
+    int i;
+    int j;
+Animal(){
+    this.i=10;
+    this.j=20;
+}  
+}  
+class Dog extends Animal{  
+    String name;
+Dog(){  
+}  
+} 
+class Main{  
+    
+public static void main(String args[]){  
+Dog d=new Dog();  
+System.out.println(d.i+" "+d.j+" "+d.name);
+
+}}  
+//output:10,20,null
+
+
+
+class Animal{  
+    int i;
+    int j;
+Animal(){
+    this.i=10;
+    this.j=20;
+}  
+Animal(int d){
+    this.i=d;
+}
+
+}  
+class Dog extends Animal{  
+    String name;
+Dog(){  
+    super(10);
+}  
+} 
+class Main{  
+    
+public static void main(String args[]){  
+Dog d=new Dog(); // go to default constructor of Dog there by using  super we can call any of the parent constructor
+System.out.println(d.i);
+
+}}  
+
+
+
+class Animal{  
+    int i;
+    int j;
+Animal(){
+    this.i=10;
+    this.j=20;
+}  
+Animal(int d){
+    this.i=d;
+}
+Animal(int k,int l){
+     this.i=k;
+    this.j=l;
+}
+
+}  
+class Dog extends Animal{  
+    String name;
+Dog(){  
+    super(10);
+}  
+Dog(int x, int y,String g){
+    super(x,y);
+    this.name=g;
+}
+} 
+class Main{  
+    
+public static void main(String args[]){  
+Dog d=new Dog();  
+System.out.println(d.i);
+Dog d1=new Dog(10,20,"deep");
+System.out.println(d1.i " "+d1.j " "+d1.name);
+}}  
+
+
+class Animal{  
+    int i;
+    int j;
+    String dept;
+Animal(){
+    this.i=10;
+    this.j=20;
+}  
+Animal(int d){
+    this.i=d;
+}
+Animal(String  t){
+    this.dept=t;
+}
+
+}  
+class Dog extends Animal{  
+    String name;
+Dog(){  
+    super("ECE");
+}  
+} 
+
+class Main{  
+    
+public static void main(String args[]){  
+Dog d=new Dog(); 
+/*go to default constructor of Dog .There by using  super it  call any of the parent constructor
+and that default Dog constructor will also be executed*/
+
+System.out.println(d.dept + d.name);
+
+}}  
+
+
+
+class Person{
+   public String name;
+   public int age;
+   public Person(String name, int age){
+      this.name = name;
+      this.age = age;
+   }
+   public void displayPerson() {
+      System.out.println("Data of the Person class: ");
+      System.out.println("Name: "+this.name);
+      System.out.println("Age: "+this.age);
+   }
+}
+public class Main extends Person {
+   public String branch;
+   public int Student_id;
+   
+   public Main(String name, int age, String branch, int Student_id){
+      super(name, age);
+      this.branch = branch;
+      this.Student_id = Student_id;
+   }
+      public Main(){
+          super("deep",10);
+      }
+   
+   public void displayStudent() {
+      System.out.println("Data of the Student class: ");
+      System.out.println("Name: "+this.name);
+      System.out.println("Age: "+this.age);
+      System.out.println("Branch: "+this.branch);
+      System.out.println("Student ID: "+this.Student_id);
+   }
+   public static void main(String[] args) throws CloneNotSupportedException {
+     // Main obj = new Main("Krishna", 20, "IT", 1256);
+     // obj.displayPerson();
+      Main obj1=new Main();
+    System.out.println("Name: "+obj1.name+ "Age: "+obj1.age+ "Branch: "+obj1.branch+  "Student ID: "+obj1.Student_id);
+   }}
+
+
+Constructor work in individual class only and supports in inheritance oncepts.
+when 2 seperate class are there we cannot use constructor there by creating an object 
+and calling the constructor.
+
+class Animal{  
+    int i;
+    int j;
+Animal(){
+    this.i=10;
+    this.j=20;
+}  
+}  
+class Main{  
+    
+public static void main(String args[]){  
+Animal d=new Animal();  
+System.out.println(d.i+" "+d.j+" "+d.name);
+
+}}  

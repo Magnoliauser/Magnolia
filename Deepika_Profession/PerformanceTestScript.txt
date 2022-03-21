@@ -1,0 +1,976 @@
+package ArcherAutomation.ArcherAutomation;
+
+import java.awt.AWTException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.math.RoundingMode;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.RichTextString;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
+import io.github.millij.poi.SpreadsheetReadException;
+import io.github.millij.poi.ss.reader.XlsReader;
+import jxl.Sheet;
+import jxl.Workbook;
+import jxl.read.biff.BiffException;
+import pageObjects.ApplicationsPage;
+import pageObjects.AssessmentManagementPage;
+import pageObjects.AuditManagementPage;
+import pageObjects.HomePage;
+import pageObjects.IssueManagementPage;
+import pageObjects.LoginPage;
+import pageObjects.MenuPage;
+import pageObjects.SecurityIncidentReportsPage;
+import pageObjects.ShowAllPage;
+import utils.API;
+import utils.Content;
+import utils.ContentAPI;
+import utils.BasicOperations;
+import utils.BottomTest;
+import utils.ExcelOperations;
+
+public class PerformanceTest extends BaseTest{
+	Calendar calendar = Calendar.getInstance();
+    static SimpleDateFormat formater = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss");
+    Map<String, Object[]> mapData ;
+    Map<String, Object[]> cellData ;
+    private static DecimalFormat df = new DecimalFormat("#.##");
+	
+    public static double myFormat(double number) {
+    	
+    	double newNumber = number/1000.0;
+    	//double finalNumber = (newNumber/100.0)%100.0;
+    	//DecimalFormat df = new DecimalFormat("#.##");
+    	System.out.println("Before format" +newNumber);
+    	df.setRoundingMode(RoundingMode.DOWN);
+    	String formatted= df.format(newNumber);
+    	System.out.println(formatted);
+    	double doubleNum = Double.parseDouble(formatted);
+    	System.out.println("Parsed No" +doubleNum);
+    	return doubleNum;
+    	}
+		
+   public static String getTimeStamp() {
+		Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		return formater.format(timestamp);
+	}
+   
+  @Test(dataProvider = "PerformanceTest" )//, retryAnalyzer =utils.TestListener.class)
+	public void performanceTest(Map<Object, Object> dataMap) throws InterruptedException, NoSuchAlgorithmException, InvalidKeySpecException, AWTException, JsonParseException, JsonMappingException, IOException, ParseException, BiffException, SpreadsheetReadException, java.text.ParseException {
+		SoftAssert softAssert = new SoftAssert();
+		Random objGenerator = new Random();
+		LoginPage.login(driver, reporterUtil, dataMap);
+				
+		StopWatch pageLoad = new StopWatch();
+		StopWatch engagement = new StopWatch();
+		BasicOperations.waitForLoad(driver);
+		Assert.assertTrue(HomePage.enterSearchTerm(driver, reporterUtil,"ENG-570843"));
+		pageLoad.start();
+		Assert.assertTrue(HomePage.clickSearchIcon(driver, reporterUtil));  //1 
+		BasicOperations.waitForLoad(driver);
+		pageLoad.stop();
+		double pageLoadTime = pageLoad.getTime(); //1
+	      
+		Date date = new Date();
+		DateFormat formatter = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+	    formatter.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+	  
+		Date page = formatter.parse(formatter.format(date));
+		String page2 = formatter.format(page);
+		BasicOperations.waitForLoad(driver);
+		DateFormat engFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		Date engDate = new Date();
+		engFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date eng2 = engFor.parse(engFor.format(engDate));
+		String eng = engFor.format(eng2);
+        engagement.start();
+	    softAssert.assertTrue(HomePage.clickEngagementName(driver, reporterUtil));  //2
+	//	BasicOperations.waitForLoad(driver);
+		engagement.stop();
+		double totalEng = engagement.getTime();  //2
+		HomePage.clickCloseIcon(driver, reporterUtil);
+		Thread.sleep(10000);
+		
+		
+		 //AuditMgmtDrpdown->Engagement&WorkPapers->WorkPaper-> WorkPapers Id Click
+		// Thread.sleep(1000);
+		StopWatch workPaper = new StopWatch();
+		DateFormat workFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		workFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date workDate = new Date();
+		Date work2 = workFor.parse(workFor.format(workDate));
+		String work = workFor.format(work2);
+	//	BasicOperations.waitForClickable("xpath", HomePage.auditManagementDropdown, driver);
+		softAssert.assertTrue(HomePage.clickAuditManagementDropdown(driver, reporterUtil));
+		softAssert.assertTrue(AuditManagementPage.clickEngagementDropdown(driver, reporterUtil));
+		softAssert.assertTrue(AuditManagementPage.clickWorkpaperLink(driver, reporterUtil));
+		AuditManagementPage.clickWorkpaperFrame(driver, reporterUtil);
+		workPaper.start();
+		AuditManagementPage.clickWorkpaperIDLink(driver, reporterUtil,"Workpaper Id link clicked");  //3
+		workPaper.stop();
+		double workPaperTime = workPaper.getTime();  //3
+	
+		//BasicOperations.waitForLoad(driver);
+	
+	//	mapData.put("4", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98257",formater.format(calendar.getTime()),myFormat(workPaperTime),"8"});
+		
+		 
+	  //  driver.switchTo().defaultContent();
+	    Thread.sleep(3000);
+	
+		 //AuditMgmtDrpdown->Planning&Quality->Plan Entity->Click 1st Entity 
+		
+		StopWatch auditPlanStart = new StopWatch();
+		DateFormat plnFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		plnFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date plnDate = new Date();
+		Date plnstrt2 = plnFor.parse(plnFor.format(plnDate));
+		String plnstrt = plnFor.format(plnstrt2);
+		HomePage.clickAuditManagementDropdown(driver, reporterUtil);
+		softAssert.assertTrue(AuditManagementPage.clickEngagementDropdown(driver, reporterUtil));
+		auditPlanStart.start();
+		AuditManagementPage.clickPlanningQualityLink(driver, reporterUtil);
+		AuditManagementPage.clickPlanEntityLink(driver, reporterUtil);
+		auditPlanStart.stop();
+	//	AuditManagementPage.clickEntityEngagementLink(driver, reporterUtil);//4
+	//	BasicOperations.waitForLoad(driver);
+	
+		double auditPlanEnd = auditPlanStart.getTime();  //4
+	//	softAssert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+		
+		/*
+		 * IssueMgmtDrpdown->IssueMgmt->Issues
+		 */
+		StopWatch issueDashboard = new StopWatch();
+	
+		DateFormat issFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		Date issDate = new Date();
+		issFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date statusA = issFor.parse(issFor.format(issDate));
+		String issueDash = issFor.format(statusA);
+		issueDashboard.start();
+		softAssert.assertTrue(HomePage.clickIssueMgmtIcon(driver, reporterUtil));//7
+		issueDashboard.stop();
+		double issueDashboardTime = issueDashboard.getTime();   //7
+	//	mapData.put("8", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98255",formater.format(calendar.getTime()),myFormat(issueDashboardTime),"4"});
+		
+	//	softAssert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+		StopWatch displayIssue = new StopWatch();
+		DateFormat dissFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		Date dissDate = new Date();
+		dissFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date displayIss2 = dissFor.parse(dissFor.format(dissDate));
+		String displayIss = dissFor.format(displayIss2);
+	
+		softAssert.assertTrue(HomePage.clickIssueMgmtDropdown(driver, reporterUtil));
+		softAssert.assertTrue(IssueManagementPage.clickSolutionIssueMgmt(driver, reporterUtil));
+		displayIssue.start();//8
+		softAssert.assertTrue(IssueManagementPage.clickIssues(driver, reporterUtil));   //8
+		BasicOperations.waitForLoad(driver);
+		displayIssue.stop();   
+		double totalIssue = displayIssue.getTime();   //8
+	//	mapData.put("9", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98234",formater.format(calendar.getTime()),myFormat(totalIssue),"5"});
+		
+		//softAssert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+		driver.navigate().refresh();
+		StopWatch issueReport = new StopWatch();
+		DateFormat issueFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		Date issueDate = new Date();
+		issueFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date issueReport2 = issueFor.parse(dissFor.format(issueDate));
+		String issueRport = issueFor.format(issueReport2);
+		
+		Assert.assertTrue(HomePage.clickIssueMgmtDropdown(driver, reporterUtil));
+		softAssert.assertTrue(IssueManagementPage.clickSolutionIssueMgmt(driver, reporterUtil));
+		Assert.assertTrue(ShowAllPage.hoverOnApp(driver, "Issues"));
+		Assert.assertTrue(ShowAllPage.clickReports(driver, reporterUtil, "Issues"));
+		Thread.sleep(8000);
+		Assert.assertTrue(AuditManagementPage.clickNextIcon(driver, reporterUtil));
+		issueReport.start();
+		Assert.assertTrue(IssueManagementPage.clickIssueStatusReport(driver, reporterUtil));//9
+//		BasicOperations.waitForLoad(driver);
+		issueReport.stop();
+		double issueReportTotal = issueReport.getTime();   //9
+//		mapData.put("10", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98236",formater.format(calendar.getTime()),myFormat(issueReportTotal),"6"});
+	//	driver.switchTo().defaultContent();
+		Assert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+		
+		/*
+		 * AuditMgmt->Engagement Status Report
+		 */
+	//	driver.switchTo().defaultContent();
+		StopWatch auditDashboard = new StopWatch();
+		DateFormat audiFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		audiFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date audidate = new Date();
+		Date audi2 = audiFor.parse(audiFor.format(audidate));
+		String audi = audiFor.format(audi2);
+		auditDashboard.start();
+		Assert.assertTrue(HomePage.clickAuditMgmtIcon(driver, reporterUtil));//5
+		auditDashboard.stop();
+		double auditDashboardTime = auditDashboard.getTime();   //5
+		StopWatch auditStatus =new StopWatch();
+		Thread.sleep(4000);
+		DateFormat audiSFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		audiSFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date audDate = new Date();
+		Date audSta = audiSFor.parse(audiSFor.format(audDate));
+		String audiStatus = audiSFor.format(audSta);
+		AuditManagementPage.clickEngagementStatusIframe(driver, reporterUtil);
+		auditStatus.start();//6
+		AuditManagementPage.clickStatusReport(driver, reporterUtil);   //6
+		auditStatus.stop();
+		double auditStatusTime =auditStatus.getTime();  //6
+	
+	//	driver.switchTo().defaultContent();
+		driver.navigate().refresh();
+	
+		/*
+		 * AssessmentMgmt->Assessment Status Report->click 1st report
+		 */
+		StopWatch assessmentDash = new StopWatch();
+		StopWatch statusReport = new StopWatch();
+		
+		DateFormat assFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		assFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date assDate = new Date();
+		Date assmentDash2 = assFor.parse(assFor.format(assDate));
+		String assmentDash = assFor.format(assmentDash2);
+		assessmentDash.start();
+		Assert.assertTrue(HomePage.clickAssessmentMgmtIcon(driver, reporterUtil));//10
+		assessmentDash.stop();
+		DateFormat statusRFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		statusRFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date statusDate = new Date();
+		Date statusRprt2 = statusRFor.parse(statusRFor.format(statusDate));
+		String statusRprt = statusRFor.format(statusRprt2);
+		double assessDashTotal = assessmentDash.getTime();        //10
+//		mapData.put("11", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98238",formater.format(calendar.getTime()),myFormat(assessDashTotal),"6"});
+		AssessmentManagementPage.switchToAssessmentFrame(driver, reporterUtil);
+		statusReport.start();//11
+		AssessmentManagementPage.clickAssessmentStatusLink(driver, reporterUtil);   //11
+		statusReport.stop();
+		double reportTotal = statusReport.getTime();			//11
+	//	mapData.put("12", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98239",formater.format(calendar.getTime()),myFormat(reportTotal),"6"});
+	//	driver.switchTo().defaultContent();
+		Assert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+		Thread.sleep(10000);
+		StopWatch openEng = new StopWatch();
+		DateFormat openEngFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		Date openDate = new Date();
+		openEngFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date openEng2 = openEngFor.parse(openEngFor.format(openDate));
+		String opnEng = openEngFor.format(openEng2);
+		Assert.assertTrue(HomePage.clickAssessmentManagementDropdown(driver, reporterUtil));
+		Assert.assertTrue(AssessmentManagementPage.clickEngagementAndWorkpaperLink(driver, reporterUtil));
+		Assert.assertTrue(ShowAllPage.clickApplication(driver, reporterUtil, "Engagement"));
+		BasicOperations.waitForLoad(driver);
+		AuditManagementPage.clickWorkpaperFrame(driver, reporterUtil);
+		openEng.start();
+		AssessmentManagementPage.clickEngagement(driver, reporterUtil);   //12
+		BasicOperations.waitForLoad(driver);
+		openEng.stop();
+		double openEngTotal = openEng.getTime();   //12
+	//	mapData.put("13", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98229",formater.format(calendar.getTime()),myFormat(openEngTotal),"6"});
+	//	driver.switchTo().defaultContent();
+		Assert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+		
+		/*
+		 * AssessmentMgmt->Assessment Detail Report
+		 */
+		StopWatch assessmentDetail = new StopWatch();
+		DateFormat assDFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		Date assDDate = new Date();
+		assDFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date assDetail2 = assDFor.parse(assDFor.format(assDDate));
+		String assDetail = assDFor.format(assDetail2);
+		
+		Assert.assertTrue(HomePage.clickAssessmentMgmtIcon(driver, reporterUtil));
+		AssessmentManagementPage.clickAssessmentDetailsIframe(driver, reporterUtil);
+		assessmentDetail.start();
+		AssessmentManagementPage.clickAssessmentDetailsLink(driver, reporterUtil);   //13
+		BasicOperations.waitForLoad(driver);
+		assessmentDetail.stop();
+		double detailTotal = assessmentDetail.getTime();   //13
+//		mapData.put("14", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98237",formater.format(calendar.getTime()),myFormat(detailTotal),"6"});
+	//	driver.switchTo().defaultContent();
+		
+		/*
+		 * AuditMgmtDrpdown->GRC Libraries->AuditPrgms->click 1st prgm
+		 */
+		
+		StopWatch auditProgram = new StopWatch();
+		DateFormat auditPrgFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		auditPrgFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date auditDate = new Date();
+		Date auditPrg1 = auditPrgFor.parse(auditPrgFor.format(auditDate));
+		String auditPrg = auditPrgFor.format(auditPrg1);
+		softAssert.assertTrue(HomePage.clickAuditManagementDropdown(driver, reporterUtil));
+		softAssert.assertTrue(AuditManagementPage.clickGRCLibraries(driver, reporterUtil));
+		softAssert.assertTrue(AuditManagementPage.clickAuditPrograms(driver, reporterUtil));
+		BasicOperations.waitForLoad(driver);
+		AuditManagementPage.clickWorkpaperFrame(driver, reporterUtil);
+		auditProgram.start();
+		AuditManagementPage.clickAuditProgramName(driver, reporterUtil);   //14
+		auditProgram.stop();
+		BasicOperations.waitForLoad(driver);
+		//BasicOperations.waitForLoad(driver);
+		
+		double auditPrgmTotal = auditProgram.getTime();   //14
+	//	driver.switchTo().defaultContent();
+		driver.navigate().refresh();
+		HomePage.clickHomeIcon(driver, reporterUtil);
+		
+		/*
+		 * AssessmentMgmtDrpdown->Engagement & Workpaper->Engagement Report Icon
+		 */
+		StopWatch assessmentEngagement = new StopWatch();
+		DateFormat assEngFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		assEngFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date assEDate = new Date();
+		Date assEng2 = assEngFor.parse(assEngFor.format(assEDate));
+		String assEng = assEngFor.format(assEng2);
+		BasicOperations.waitForLoad(driver);
+		
+		
+	//	driver.navigate().refresh();
+		Thread.sleep(2000);
+	
+	    	//uncomment once able to runn
+		Assert.assertTrue(HomePage.clickAuditMgmtIcon(driver, reporterUtil));
+		Thread.sleep(4000);
+		AuditManagementPage.clickEngagementStatusIframe(driver, reporterUtil);
+		assessmentEngagement.start();
+		AssessmentManagementPage.clickEnaggementScoreReport(driver, reporterUtil);
+		BasicOperations.waitForLoad(driver);
+		assessmentEngagement.stop();
+		double engagementTime = assessmentEngagement.getTime();//15
+//		mapData.put("15", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98245",formater.format(calendar.getTime()),myFormat(engagementTime),"6"});
+		//driver.switchTo().defaultContent();
+		softAssert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+	
+		
+		
+//		mapData.put("16", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98242",formater.format(calendar.getTime()),myFormat(auditPrgmTotal),"4"});
+		
+		/*
+		 * AuditMgmtDrpdown->GRC Libraries->Hover AuditPrgms->ReportIcon
+		 */
+	//	driver.switchTo().defaultContent();
+		StopWatch csaReport = new StopWatch();
+		DateFormat newRprtFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		newRprtFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date newRprt1 = newRprtFor.parse(newRprtFor.format(date));
+		String newReport = newRprtFor.format(newRprt1);
+		softAssert.assertTrue(HomePage.clickAuditManagementDropdown(driver, reporterUtil));
+		Thread.sleep(5000);
+		softAssert.assertTrue(AuditManagementPage.clickGRCLibraries(driver, reporterUtil));
+		softAssert.assertTrue(ShowAllPage.hoverOnApp(driver, "Audit Programs"));
+		softAssert.assertTrue(ShowAllPage.clickReports(driver, reporterUtil,"Audit Programs"));
+		Thread.sleep(10000);
+		AuditManagementPage.clickAuditProgramReportIframe(driver, reporterUtil);
+		csaReport.start();		
+		AuditManagementPage.clickAuditProgramReport(driver, reporterUtil);
+		csaReport.stop();
+		double csaTotal =  csaReport.getTime();//16
+		//driver.switchTo().defaultContent();
+		driver.navigate().refresh();
+		BasicOperations.waitForLoad(driver);
+		Thread.sleep(5000);
+	
+//		mapData.put("17", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98243",formater.format(calendar.getTime()),myFormat(csaTotal),"6"});
+		
+	//	Thread.sleep(1000);
+		/*
+		 * AuditMgmtDrpdown->GRC Libraries->Auditable Entires->SearchIcon
+		 */
+		StopWatch auditableEntries = new StopWatch();
+		DateFormat auditableFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		auditableFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date auditableDate = new Date();
+		Date auditable1 = auditableFor.parse(auditableFor.format(auditableDate));
+		String auditableEnt = auditableFor.format(auditable1);
+		softAssert.assertTrue(HomePage.clickAuditManagementDropdown(driver, reporterUtil));
+		Thread.sleep(0200);
+		
+		softAssert.assertTrue(AuditManagementPage.clickGRCLibraries(driver, reporterUtil));
+		softAssert.assertTrue(ShowAllPage.hoverOnApp(driver, "Auditable Entities"));
+		softAssert.assertTrue(ShowAllPage.clickSearchIRisk(driver, reporterUtil,"Auditable Entities"));
+		softAssert.assertTrue(AuditManagementPage.enterSearchTerm(driver, reporterUtil,"AE-224097"));
+		auditableEntries.start();
+		softAssert.assertTrue(AuditManagementPage.clickSearchButton(driver, reporterUtil));
+	//	BasicOperations.waitForLoad(driver);
+		auditableEntries.stop();
+		double auditableTotal = auditableEntries.getTime();  //17
+		System.out.println("Auditable"+auditableTotal);
+//		mapData.put("18", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98227",formater.format(calendar.getTime()),myFormat(auditableTotal),"3"});
+		
+		
+			
+		
+		/*
+		 *  AuditMgmtDrpdown->Risk Libraries->Risk Map->Report icon
+		 */
+		//driver.switchTo().defaultContent();
+		Thread.sleep(10000);
+		StopWatch riskTheme = new StopWatch();
+		DateFormat riskTheFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		riskTheFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date riskDate = new Date();
+		Date risk1 = riskTheFor.parse(riskTheFor.format(riskDate));
+		String riskThe = riskTheFor.format(risk1);
+		softAssert.assertTrue(HomePage.clickAuditManagementDropdown(driver, reporterUtil));
+		softAssert.assertTrue(AuditManagementPage.clickGRCLibraries(driver, reporterUtil));
+		softAssert.assertTrue(AuditManagementPage.clickRiskLibraries(driver, reporterUtil));
+		
+		softAssert.assertTrue(ShowAllPage.hoverOnApp(driver, "Risk Map"));
+		softAssert.assertTrue(ShowAllPage.clickReports(driver, reporterUtil,"Risk Map"));
+		Thread.sleep(10000);
+		softAssert.assertTrue(AuditManagementPage.clickNextIcon(driver, reporterUtil));
+		riskTheme.start();
+		softAssert.assertTrue(AuditManagementPage.clickRiskSummaryReport(driver, reporterUtil));
+	//	BasicOperations.waitForLoad(driver);
+		riskTheme.stop();
+		double riskTotal = riskTheme.getTime();//18
+	//	mapData.put("19", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98256",formater.format(calendar.getTime()),myFormat(riskTotal),"4"});
+	//	driver.switchTo().defaultContent();
+		softAssert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+		
+		/*
+		 * ShowAll->InsiderTrading->Dashboard insiderTrading
+		 */
+		StopWatch insiderDash =  new StopWatch();
+		DateFormat insiderDFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		insiderDFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date insiderDate = new Date();
+		Date insider1 = insiderDFor.parse(insiderDFor.format(insiderDate));
+		String insiderDashCurr = insiderDFor.format(insider1);
+		softAssert.assertTrue(HomePage.clickShowAllLink(driver, reporterUtil));
+		softAssert.assertTrue(ShowAllPage.clickInsiderTradingLink(driver, reporterUtil));
+		insiderDash.start();
+		softAssert.assertTrue(ShowAllPage.clickInsiderTradingDashboard(driver, reporterUtil));
+	//	BasicOperations.waitForLoad(driver);
+		insiderDash.stop();
+		double insiderDashTotal = insiderDash.getTime(); //19
+	//	mapData.put("20", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98253",formater.format(calendar.getTime()),myFormat(insiderDashTotal),"3"});
+		StopWatch adminDashboard = new StopWatch();
+		DateFormat adminFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		adminFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date adminDate = new Date();
+		Date admin1 = adminFor.parse(adminFor.format(adminDate));
+		String adminInsider = adminFor.format(admin1);
+		softAssert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+		
+		/*
+		 * ShowAll->InsiderTrading->Dashboard insiderTrading
+		 */
+	//	driver.switchTo().defaultContent();
+		//softAssert.assertTrue(HomePage.clickShowAllLink(driver, reporterUtil));
+	//softAssert.assertTrue(ShowAllPage.clickInsiderTradingLink(driver, reporterUtil));
+		adminDashboard.start();
+		softAssert.assertTrue(ShowAllPage.clickInsiderTradingDashboard(driver, reporterUtil));
+	//	Thread.sleep(3000);
+		BasicOperations.waitForLoad(driver);
+		adminDashboard.stop();
+		double adminDashTotal = adminDashboard.getTime();//20
+	//	mapData.put("21", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98252",formater.format(calendar.getTime()),myFormat(adminDashTotal),"4"});
+		StopWatch tradingList = new StopWatch();
+		StopWatch viewHistroy = new StopWatch();
+		DateFormat tradeFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		tradeFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date tradeDate = new Date();
+		Date trade1 = tradeFor.parse(tradeFor.format(tradeDate));
+		String trade = tradeFor.format(trade1);
+		Thread.sleep(1000);
+		BasicOperations.waitForFrametoBeavailable(0, driver);
+		ShowAllPage.clickInsiderTradingListIDIframe(driver, reporterUtil);
+		tradingList.start();
+		ShowAllPage.clickInsiderTradingListID(driver, reporterUtil,"435140");
+	//	BasicOperations.waitForLoad(driver);
+		tradingList.stop();
+		
+		double tradingListTotal =tradingList.getTime(); //21
+	//	mapData.put("22", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98254",formater.format(calendar.getTime()),myFormat(tradingListTotal),"3"});
+		
+		DateFormat historyFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		historyFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date historyDate = new Date();
+		Date history1 = historyFor.parse(historyFor.format(historyDate));
+		String history = historyFor.format(history1);
+		
+		BasicOperations.waitForFrametoBeavailable(0, driver);
+		viewHistroy.start();
+		Assert.assertTrue(ShowAllPage.clickViewHistoryLog(driver, reporterUtil));
+		BasicOperations.waitForLoad(driver);
+		viewHistroy.stop();
+		double viewHistoryTotal = viewHistroy.getTime(); //22
+	//	mapData.put("23", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98247",formater.format(calendar.getTime()),myFormat(viewHistoryTotal),"3"});
+		StopWatch search = new StopWatch();
+		DateFormat homeFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		homeFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date homeDate = new Date();
+		Date home = homeFor.parse(homeFor.format(homeDate));
+		String homeSearch = homeFor.format(home);
+		//driver.switchTo().defaultContent();
+		softAssert.assertTrue(HomePage.enterSearchTerm(driver, reporterUtil, "bertele.km"));
+		search.start();
+		softAssert.assertTrue(HomePage.clickSearchIcon(driver, reporterUtil));
+	//	BasicOperations.waitForLoad(driver);
+		search.stop();
+		double searchTotal = search.getTime();
+		//mapData.put("24", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98235",formater.format(calendar.getTime()),myFormat(searchTotal),"5"});
+		softAssert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+		/*
+		 * Show All->ConflictOfInterest->
+		*/
+		StopWatch conflict = new StopWatch();
+		DateFormat confliFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		confliFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date confliDate = new Date();
+		Date confli2 = confliFor.parse(confliFor.format(confliDate));
+		String confli = confliFor.format(confli2);
+		softAssert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+		softAssert.assertTrue(HomePage.clickShowAllLink(driver, reporterUtil));
+		softAssert.assertTrue(ShowAllPage.clickConflictOfInterest(driver, reporterUtil));
+	
+	//	softAssert.assertTrue(ShowAllPage.clickConflictOfInterestHome(driver, reporterUtil));
+		Thread.sleep(0200);
+		//BasicOperations.waitForFrametoBeavailable(0, driver);
+		
+		softAssert.assertTrue(ShowAllPage.clickReportConflict(driver, reporterUtil));
+		
+		ShowAllPage.clickConflictOfInterestIframe(driver, reporterUtil);
+		conflict.start();
+		Assert.assertTrue(ShowAllPage.clickCloseIcon(driver, reporterUtil));
+		conflict.stop();
+		softAssert.assertTrue(ShowAllPage.clickYesButton(driver, reporterUtil));
+			BasicOperations.waitForLoad(driver);
+		
+		double conflictTotal = conflict.getTime();  //24
+		driver.switchTo().defaultContent();
+	//	mapData.put("25", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98258",formater.format(calendar.getTime()),myFormat(conflictTotal),"5"});
+		StopWatch incidentMgmt = new StopWatch();
+		//No warning message
+		/*
+		 * ShowAll->IncidentMgmt->IncidentMgmt
+		 */
+		DateFormat incidentFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		incidentFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date incidentDate = new Date();
+		Date incidentMg1 = incidentFor.parse(incidentFor.format(incidentDate));
+		String incidentMg = incidentFor.format(incidentMg1);
+	//	driver.switchTo().defaultContent();
+		softAssert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+		
+		softAssert.assertTrue(HomePage.clickShowAllLink(driver, reporterUtil));
+		softAssert.assertTrue(ShowAllPage.clickIncidentMgmt(driver, reporterUtil));
+		incidentMgmt.start();
+		softAssert.assertTrue(ShowAllPage.clickDashboardIncidentMgmt(driver, reporterUtil));
+	//	BasicOperations.waitForLoad(driver);
+		incidentMgmt.stop();
+		double incidentMgmtTotal = incidentMgmt.getTime();  //25
+		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+	//	mapData.put("26", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98248",formater.format(calendar.getTime()),myFormat(incidentMgmtTotal),"4"});
+		
+		/*
+		 * ShowAll->IncidentMgmt->Soln IncidentMgmt->Incidents->
+		 */
+		StopWatch incident = new StopWatch();
+		StopWatch report = new StopWatch();
+		DateFormat incident1For = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		incident1For.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date incident1Date = new Date();
+		Date incident1 = incident1For.parse(incident1For.format(incident1Date));
+		String incidents = incident1For.format(incident1);
+	//	driver.switchTo().defaultContent();
+		softAssert.assertTrue(ShowAllPage.clickSolutionIncidentMgmt(driver, reporterUtil));
+		softAssert.assertTrue(ShowAllPage.clickIncidentMgmt(driver, reporterUtil));
+		softAssert.assertTrue(ShowAllPage.hoverOnApp(driver, "Incidents"));
+		incident.start();
+		softAssert.assertTrue(ShowAllPage.clickReports(driver, reporterUtil,"Incidents"));
+    	//BasicOperations.waitForLoad(driver);
+		incident.stop();
+		double incidentTotal = incident.getTime();  //26
+		BasicOperations.waitForFrametoBeavailable(0, driver);
+	//	mapData.put("27", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98233",formater.format(calendar.getTime()),myFormat(incidentTotal),"5"});
+		
+	
+		DateFormat reportStFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		reportStFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date reportDate = new Date();
+		Date reportStrt1 = reportStFor.parse(reportStFor.format(reportDate));
+		String reportStrt = reportStFor.format(reportStrt1);
+		report.start();
+		softAssert.assertTrue(ShowAllPage.clickFirstIncident(driver, reporterUtil));
+	//	BasicOperations.waitForLoad(driver);
+		report.stop();
+		double incidentAFCOETotal = report.getTime();//27
+	//	mapData.put("28", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98228",formater.format(calendar.getTime()),myFormat(incidentAFCOETotal),"6"});
+		softAssert.assertTrue(ShowAllPage.clickCloseIcon(driver, reporterUtil));
+		softAssert.assertTrue(HomePage.clickHomeIcon(driver, reporterUtil));
+		Thread.sleep(3000);
+		
+		StopWatch newIRIsk = new StopWatch();
+		/*
+		 * Show All->iRisk->iRisk(Solution)->Hover iRisk Assessment->Create New icon 
+		 
+		StopWatch newIRIsk = new StopWatch();
+		DateFormat iRiskFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		iRiskFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date iRiskDate = new Date();
+		Date iRisk1 = iRiskFor.parse(iRiskFor.format(iRiskDate));
+		String iRisk = iRiskFor.format(iRisk1);
+		driver.switchTo().defaultContent();
+		softAssert.assertTrue(HomePage.clickShowAllLink(driver, reporterUtil));
+		ShowAllPage.clickIRiskLink(driver, reporterUtil);
+		
+		softAssert.assertTrue(ShowAllPage.clickSolutionIRisk(driver, reporterUtil));
+		softAssert.assertTrue(ShowAllPage.hoverOnApp(driver, "iRisk Assessment"));
+		newIRIsk.start();
+		softAssert.assertTrue(ShowAllPage.clickNewRecord(driver, reporterUtil,"iRisk Assessment"));
+		BasicOperations.waitForLoad(driver);
+		newIRIsk.stop();
+		double newIRiskTotal = newIRIsk.getTime();
+	//	mapData.put("29", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98232",formater.format(calendar.getTime()),myFormat(newIRiskTotal),"5"});
+		Thread.sleep(1000);
+		softAssert.assertTrue(ShowAllPage.clickNewRecordCloseIcon(driver, reporterUtil));
+		/*
+		 * Show All->iRisk->(Dashboard)Info security:iRisk Analyst Appln... 
+		 */
+		StopWatch iRiskAppDash = new StopWatch();
+		DateFormat iRiskAppFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		iRiskAppFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date iRiskAppDate = new Date();
+		Date iRiskApp1 = iRiskAppFor.parse(iRiskAppFor.format(iRiskAppDate));
+		String appDash = iRiskAppFor.format(iRiskApp1);
+		StopWatch iRiskNetwork = new StopWatch();
+		
+		DateFormat networkFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		networkFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date networkDate = new Date();
+		Date network1 = networkFor.parse(networkFor.format(networkDate));
+		String networkDash = networkFor.format(network1);
+		StopWatch iRiskSystem = new StopWatch();
+		DateFormat systemFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		systemFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date systemDate = new Date();
+		Date system1 = systemFor.parse(systemFor.format(systemDate));
+		String systemDash = systemFor.format(system1);
+		driver.switchTo().defaultContent();
+		Thread.sleep(2000);
+		BasicOperations.waitForLoad(driver);
+		softAssert.assertTrue(ShowAllPage.clickNewIRisk(driver, reporterUtil));
+		//ShowAllPage.clickAnalystApplication(driver, reporterUtil);
+	//	Thread.sleep(0200);
+		BasicOperations.waitForFrametoBeavailable(0, driver);
+		softAssert.assertTrue(ShowAllPage.clickDashboardDropdown(driver, reporterUtil));
+		iRiskAppDash.start();
+		iRiskNetwork.start();
+		
+		ShowAllPage.clickApplicationDashboardOption(driver, reporterUtil);
+		BasicOperations.waitForLoad(driver);
+		iRiskAppDash.stop();
+		double appDashIRisk = iRiskAppDash.getTime();  //28
+		softAssert.assertTrue(ShowAllPage.clickDashboardDropdown(driver, reporterUtil));
+		
+		 ShowAllPage.clickDashboardOption(driver, reporterUtil);
+		iRiskNetwork.stop();
+		double networkIRisk = iRiskNetwork.getTime(); //29
+		iRiskSystem.start();
+		softAssert.assertTrue(ShowAllPage.clickDashboardDropdown(driver, reporterUtil));
+		//Thread.sleep(1000);
+		
+		ShowAllPage.clickDashboardSystemOption(driver, reporterUtil);
+		BasicOperations.waitForLoad(driver);
+		iRiskSystem.stop();
+		double systemIRisk = iRiskSystem.getTime();  //30
+		/*
+		 * Click Show All->iRisk->iRisk(Solution)->Hover iRisk Assessment->Search icon
+		 */
+		//driver.navigate().refresh();
+		StopWatch searchIRisk = new StopWatch();
+		DateFormat iRiskSearchFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		iRiskSearchFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date searchDate = new Date();
+		Date search1 = iRiskSearchFor.parse(iRiskSearchFor.format(searchDate));
+		String iRiskSearch = iRiskSearchFor.format(search1);
+	//	driver.switchTo().defaultContent();
+		//Thread.sleep(5000);
+		//	HomePage.clickShowAllLink(driver, reporterUtil);
+		
+		softAssert.assertTrue(ShowAllPage.clickIRiskLink(driver, reporterUtil));
+		softAssert.assertTrue(ShowAllPage.clickSolutionIRisk(driver, reporterUtil));
+		softAssert.assertTrue(ShowAllPage.hoverOnApp(driver, "iRisk Assessment NG"));
+	
+		softAssert.assertTrue(ShowAllPage.clickSearchIRisk(driver, reporterUtil, "iRisk Assessment NG"));
+		BasicOperations.waitForLoad(driver);
+		
+		softAssert.assertTrue(AuditManagementPage.enterSearchTerm(driver, reporterUtil, "7FF480725EF008FA"));
+		searchIRisk.start();
+		softAssert.assertTrue(AuditManagementPage.clickSearchButton(driver, reporterUtil));
+		BasicOperations.waitForLoad(driver);
+		searchIRisk.stop();
+		double searchIRiskTotal = newIRIsk.getTime(); //31
+	//	mapData.put("30", new Object[]{randomNumber,formater.format(calendar.getTime()), "6.5","archerprod","Atlanta","Y","98259",formater.format(calendar.getTime()),myFormat(searchIRiskTotal),"5"});
+		Thread.sleep(2000);
+		softAssert.assertTrue(ShowAllPage.clickSearchPageCloseIcon(driver, reporterUtil));
+		//driver.navigate().refresh();
+	//	Thread.sleep(1000);
+	/*	StopWatch assessmentType = new StopWatch();
+		DateFormat assessFor = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		assessFor.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date assessDate = new Date();
+		Date assess1 = assessFor.parse(assessFor.format(assessDate));
+		String assessType = assessFor.format(assess1);
+		Thread.sleep(1000);
+		*/
+		//softAssert.assertTrue(HomePage.clickShowAllLink(driver, reporterUtil));
+/*		ShowAllPage.clickIRiskLink(driver, reporterUtil);
+		//softAssert.assertTrue(ShowAllPage.clickSolutionIRisk(driver, reporterUtil));
+		softAssert.assertTrue(ShowAllPage.hoverOnApp(driver, "iRisk Assessment NG"));
+	
+		softAssert.assertTrue(ShowAllPage.clickReports(driver, reporterUtil, "iRisk Assessment NG"));
+		assessmentType.start();
+		softAssert.assertTrue(ShowAllPage.clickAssessmentType(driver, reporterUtil));
+		assessmentType.stop();
+		double assessmentTypeTotal = assessmentType.getTime();	*/
+		Date secdate = new Date();
+		DateFormat secformatter = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		secformatter.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+	  
+		Date securityIncDTime = secformatter.parse(secformatter.format(secdate));
+		String secTime = secformatter.format(securityIncDTime);
+		Assert.assertTrue(HomePage.enterSearchTerm(driver, reporterUtil,"INC-1307289"));
+		Assert.assertTrue(HomePage.clickSearchIcon(driver, reporterUtil));
+		BasicOperations.waitForLoad(driver);
+		StopWatch securityInc = new StopWatch();
+		securityInc.start();
+		Assert.assertTrue(HomePage.clickSearchedIncident(driver, reporterUtil));
+		BasicOperations.waitForLoad(driver);
+		securityInc.stop();
+		double securityIncTime = securityInc.getTime();  //32
+	
+		Date secDdate = new Date();
+		
+		DateFormat secDetail = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		secDetail.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		  Date secD = secDetail.parse(secDetail.format(secDdate));
+		String secDetailsTime = secDetail.format(secD);
+		
+		BasicOperations.waitForFrametoBeavailable(0, driver);
+		Assert.assertTrue(HomePage.clickCloseIcon(driver, reporterUtil));
+		Assert.assertTrue(HomePage.clickShowAllLink(driver, reporterUtil));
+		Assert.assertTrue(MenuPage.clickIncidentResponseLink(driver, reporterUtil));
+		Assert.assertTrue(MenuPage.clickIncidentResponseDropdown(driver, reporterUtil));
+		StopWatch securityIncds = new StopWatch();
+		securityIncds.start();
+		Assert.assertTrue(ApplicationsPage.clickOnApp(driver, reporterUtil, "Security Incidents"));
+		BasicOperations.waitForLoad(driver);
+		securityIncds.stop();
+		double securityIncdsTime = securityIncds.getTime();  //33
+		
+		DateFormat dateSec = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		dateSec.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date secPlan = new Date();
+		Date secPlan2 = dateSec.parse(dateSec.format(secPlan));
+		String incDashboardTime = formatter.format(secPlan2);
+		HomePage.clickHomeIcon(driver, reporterUtil);
+		StopWatch dashboard = new StopWatch();
+		dashboard.start();
+		Assert.assertTrue(MenuPage.clickIncidentResponse(driver, reporterUtil));
+		dashboard.stop();
+		double dashboardTime = dashboard.getTime();  //34
+		
+		Date avgSecDate = new Date();
+		
+		DateFormat avgL = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+		avgL.setTimeZone(TimeZone.getTimeZone("GMT-4"));
+		Date avgDate = avgL.parse(avgL.format(avgSecDate));
+		String avgTime = formatter.format(avgDate);
+		Assert.assertTrue(MenuPage.clickIncidentResponseDropdown(driver, reporterUtil));
+		Assert.assertTrue(ApplicationsPage.hoverOnApp(driver,"Security Incidents"));
+		StopWatch avgL1 = new StopWatch();
+		Assert.assertTrue(ApplicationsPage.clickIconOnApp(driver, reporterUtil, "Reports", "Security Incidents"));
+		avgL1.start();
+		Assert.assertTrue(SecurityIncidentReportsPage.clickAvgL1QueueTime(driver, reporterUtil));
+		avgL1.stop();
+		double avgL1Time = avgL1.getTime();  //35
+		
+	
+		System.out.println("Test case executed");
+		
+	
+		try {
+			FileInputStream file = new FileInputStream(System.getProperty("user.dir")+"\\outputExcel\\Performance.xls");
+	      	HSSFWorkbook workbook = new HSSFWorkbook(file);
+		    HSSFSheet sheet = workbook.getSheet("Don't Edit");
+		//	HSSFWorkbook workbook = new HSSFWorkbook();
+		  //  HSSFSheet sheet = workbook.createSheet("Don't Edit");
+		    CellStyle style;
+			mapData  =new LinkedHashMap<String, Object[]>();
+		//	if(i==36) {
+			Calendar calendar = Calendar.getInstance();
+	    SimpleDateFormat formater = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss");
+		//Map<String, Object[]> mapData = new LinkedHashMap<String, Object[]>();
+	  //  HSSFSheet newSheet = workbook.createSheet("Step Average");
+	    DataFormat dataFormat = workbook.createDataFormat();
+	   
+	   Set<String> keyset = mapData.keySet();
+	   Double randomNumber = sheet.getRow(1).getCell(0).getNumericCellValue();
+       randomNumber = randomNumber+1;
+		
+	//   Set<String> averageSet = averageData.keySet();
+		//mapData.put("1", new Object[]{"27153", "27168", "27154","27156","27155","27157","27159","27169","27164","27171"});
+      
+		int rownum = 1;
+        int avgrow = 37;
+        int rowTwo=36;
+		
+        mapData.put("1", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92691",page2,myFormat(pageLoadTime),"0","4"});
+    	mapData.put("2", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92705",eng,myFormat(totalEng),"0","7"});
+    	mapData.put("3", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92719",work,myFormat(workPaperTime),"0","8"});
+    	mapData.put("4", new  Object[]{randomNumber,page2,"95627","92684","92683","92686","92702",plnstrt,myFormat(auditPlanEnd),"0","4"});
+		mapData.put("5", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92701",audi,myFormat(auditDashboardTime),"0","4"});
+		mapData.put("6", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92707",audiStatus,myFormat(auditStatusTime),"0","6"});
+		mapData.put("7", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92716",issueDash,myFormat(issueDashboardTime),"0","4"});
+		mapData.put("8", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92694",displayIss,myFormat(totalIssue),"0","5"});
+		mapData.put("9", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92696",issueRport,myFormat(issueReportTotal),"0","6"});
+		mapData.put("10", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92698",assmentDash,myFormat(assessDashTotal),"0","6"});
+		mapData.put("11", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92699",statusRprt,myFormat(reportTotal),"0","6"});
+	    mapData.put("12", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92689",opnEng,myFormat(openEngTotal),"0","7"});
+		mapData.put("13", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92697",assDetail,myFormat(detailTotal),"0","6"});
+	    mapData.put("14", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92703",auditPrg,myFormat(auditPrgmTotal),"0","4"});	
+		mapData.put("15", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92706",assEng,myFormat(engagementTime),"0","5"});
+		mapData.put("16", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92704",newReport,myFormat(csaTotal),"0","6"});
+		mapData.put("17", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92688",auditableEnt,myFormat(auditableTotal),"0","3"});
+		mapData.put("18", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92718",riskThe,myFormat(riskTotal),"0","4"});
+		mapData.put("19", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92714",insiderDashCurr,myFormat(insiderDashTotal),"0","3"});
+		mapData.put("20", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92713",adminInsider,myFormat(adminDashTotal),"0","4"});
+		mapData.put("21", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92715",trade,myFormat(tradingListTotal),"0","3"});
+		mapData.put("22", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92708",history,myFormat(viewHistoryTotal),"0","3"});
+		mapData.put("23", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92695",homeSearch,myFormat(searchTotal),"0","5"});
+		mapData.put("24", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92720",confli,myFormat(conflictTotal),"0","5"});
+		mapData.put("25", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92709",incidentMg,myFormat(incidentMgmtTotal),"0","4"});
+		mapData.put("26", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92693",incidents,myFormat(incidentTotal),"0","5"});
+	    mapData.put("27", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92687",reportStrt,myFormat(incidentAFCOETotal),"0","6"});
+		mapData.put("28", new Object[]{randomNumber,page2,"95627","92684","92683","92686","92710",appDash,myFormat(appDashIRisk),"0","5"});
+		mapData.put("29", new Object[]{randomNumber,page2,"95627","92684","92683","92686","92711",networkDash,myFormat(networkIRisk),"0","5"});
+		mapData.put("30", new Object[]{randomNumber,page2,"95627","92684","92683","92686","92712",systemDash,myFormat(systemIRisk),"0","5"});
+		mapData.put("31", new Object[]{randomNumber,page2, "95627","92684","92683","92686","92721",iRiskSearch,myFormat(searchIRiskTotal),"0","5"});
+		mapData.put("32", new Object[]{randomNumber,page2,"95627","92684","92683","92686","98201",secTime,myFormat(securityIncTime),"0","5"});
+		mapData.put("33", new Object[]{randomNumber,page2,"95627","92684","92683","92686","98202",secDetailsTime,myFormat(securityIncdsTime),"0","5"});
+		mapData.put("34", new Object[]{randomNumber,page2,"95627","92684","92683","92686","98203",incDashboardTime,myFormat(dashboardTime),"0","5"});
+		mapData.put("35", new  Object[]{randomNumber,page2,"95627","92684","92683","92686","98204",avgTime,myFormat(avgL1Time),"0","5"});
+		
+		Row row  ;
+      
+        for (String key : keyset) {
+        	row = sheet.createRow(rownum++);
+        	//row = sheet.getRow(rownum++);
+            Object[] objArr = mapData.get(key);
+          // Object[]  newObjArr  =averageData.get(avgkey);
+            int cellnum = 0;
+            int avgCell =37;
+            int rowCount =0;
+            for (Object obj : objArr) {
+              Cell   cell = row.createCell(cellnum++);
+             //Cell cell= null;
+           //  cell = row.getCell(cellnum);
+                if (obj instanceof String) {
+                    cell.setCellValue((String) obj);
+              	 } 
+                else if (obj instanceof Date) {
+                    cell.setCellValue((Date) obj);
+                }
+                else if (obj instanceof Double) {
+                    cell.setCellValue((Double) obj);
+                }
+                else if (obj instanceof Integer ) {
+                    cell.setCellValue((Integer) obj);
+                }
+                
+                else if (obj instanceof Float) {
+                    cell.setCellValue((Float) obj);
+                }
+                else if(obj instanceof DecimalFormat) {
+                	style = workbook.createCellStyle();
+                	style.setDataFormat(dataFormat.getFormat("0.000"));
+                	//cell.setCellValue(();
+                }
+                Cell cellTotal = sheet.getRow(1).createCell(11);
+               cellTotal.setCellFormula("SUM(I2:I35)");
+            }
+        }
+        //sheet.getRow(2).createCell(11).setCellFormula("SUM(I2:I34)");
+       
+        FileOutputStream out = new FileOutputStream(new File(System.getProperty("user.dir")+"\\outputExcel\\Performance.xls"));
+        workbook.write(out);
+        workbook.close();
+        out.close();
+
+        System.out.println("Excel written successfully..");
+      //     ContentAPI.contentAPI();
+		}catch (Exception e) {
+			// TODO: handle exception
+		}
+      }
+		@DataProvider(name = "PerformanceTest")
+		public Object[][] dataSupplier() throws IOException {
+			return ExcelOperations.getDatafromSheet(PerformanceTest.class.getSimpleName());		
+		  }
+
+}

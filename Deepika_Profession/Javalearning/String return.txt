@@ -1,0 +1,44 @@
+public class Main {
+ 
+    public static void main(String[] args) {
+        String str = "Hello";
+        System.out.println("In main: Before Passing String " +
+                    "to method: " + str);
+        method("Hello");
+        System.out.println("In main: After returning " +
+                    "from method: " + str);
+    }
+ 
+    public static void method(String s) {
+        System.out.println(s);
+        s = s + " World";
+        //s += " World";
+        
+        System.out.println("In method(): " + s);
+    }
+}
+
+
+
+==============
+public class Main {
+ 
+    public static void main(String[] args) {
+        String str = "Hello";
+        System.out.println("In main: Before Passing String " +
+                    "to method: " + str);
+        method("Hello","test");
+        System.out.println("In main: After returning " +
+                    "from method: " + str);
+    }
+ 
+    public static void method(String s , String g) {
+        System.out.println(s + g );
+        String a = "deepika";
+        a = a + "won";
+        //s = s + " World";
+        //s += " World";
+        
+        System.out.println("In method(): " + a);
+    }
+}	

@@ -1,0 +1,4 @@
+Copy the path of project
+go to command promt
+cd path
+mvn verify

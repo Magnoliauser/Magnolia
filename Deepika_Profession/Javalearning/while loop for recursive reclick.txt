@@ -1,0 +1,19 @@
+public class Whileloop1 {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		int i=5;
+		while(i<10) {
+		    try {
+		        System.out.print(i);
+		        i=i/1; // i=5->execute and i=0 (go to catch)
+		        
+		        
+		        break;
+		    } catch (Exception e) {
+		        System.err.println("Not a valid input. Error :" + e.getMessage());
+		        i++;
+		    }
+		}
+	}
+}

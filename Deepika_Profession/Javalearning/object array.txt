@@ -1,0 +1,20 @@
+import java.util.*;
+public class Main {
+    public static void main(String args[])
+    {
+        Object[] ob={"10","20"};
+        
+        
+        System.out.println(ob[0]);
+        Object[] ob1=new Object[2];
+       // ob1.aadd(ob);
+        Object[] ob2=new Object[]{"10","20"};
+         ArrayList<Object[]> arr = new ArrayList<Object[]>();
+         arr.add(ob);
+         System.out.println(arr.size());
+         //System.out.print(arr.get(1));
+         for (int i=0;i<arr.size();i++){
+             System.out.println(arr.get(i));
+         }
+    }
+}

@@ -1,0 +1,158 @@
+Call by value:
+A copy of variable is created in one method and  given that copy to other method for using that copy.
+The original value remains the same.
+Used in the concept of imput parameters. 
+eg) credit( 10,20)
+void credit(int a , int b);  
+EG: Normal program
+
+public class Main{
+    
+   public static void main(String[] args){
+    
+    
+     Main obj=new Main();
+     obj.credit(10,100);
+     System.out.println(c); // c is local variable for credit method.hence throwing error
+ 
+        }
+   public  void credit(int a ,int b) {
+int c= a +b;
+System.out.println(c);
+   }
+    
+   }
+
+
+Call by value:
+
+public class Main{
+    int a;
+    int b;
+   public static void main(String[] args){
+    Main obj=new Main();
+    obj.a=100;
+    obj.b=200;
+    
+     
+     obj.credit(obj.a,obj.b);
+     
+     System.out.println(obj.b);
+     
+ 
+        }
+   public  void credit(int a ,int b) {
+int c= a +b;
+System.out.println(c);
+   }
+    
+    
+
+}
+
+
+public class Main{
+    int a;
+    int b;
+   public static void main(String[] args){
+    Main obj=new Main();
+    
+    int c=10;
+    int d=20;
+     
+     obj.credit(c,d);
+     
+     System.out.println(c);
+     
+ 
+        }
+   public  void credit(int a ,int b) {
+int c= a +b;
+System.out.println(c);
+   }
+
+Call by reference:
+
+public class Main{
+    int a;
+    int b;
+   public static void main(String[] args){
+    Main obj=new Main();
+    obj.a=100;
+    obj.b=200;
+    
+     
+     obj.credit(obj.a,obj.b);
+     
+     System.out.println(obj.b);
+     
+     obj.debit(obj);
+     System.out.println(obj.b);
+     
+ 
+        }
+   public  void credit(int a ,int b) {
+int c= a +b;
+System.out.println(c);
+   }
+   public void debit (Main m) {        //m-Reference,Main-class .A reference is created for class .and object of the class in passed inside the method
+       m.a=10;
+   m.b=20;
+   System.out.println(m.a + m.b);
+       
+       
+   }
+   
+ }
+ 
+ 
+ EX 2:
+ 
+ public class Main{
+    int a = 30;
+      int b = 45;
+    
+   public static void main(String[] args){
+      
+      Main obj = new Main();
+      
+      System.out.println("Before swapping, a = " + obj.a + " and b = " + obj.b);
+      // Invoke the swap method
+      swapFunction(obj);
+      System.out.println("\n**Now, Before and After swapping values will be same here**:");
+      System.out.println("After swapping, a = " + obj.a + " and b is " + obj.b);
+   }
+   public static void swapFunction(Main m) {
+      System.out.println("Before swapping(Inside), a = " + m.a + " b = " + m.b);
+      // Swap n1 with n2
+      int c= m.a;
+      m.a =m.b;
+      m.b =c;
+      System.out.println("After swapping(Inside), a = " + m.a + " b = " + m.b);
+   }
+}
+
+
+public class Main{
+    int a;
+    int b;
+   public static void main(String[] args){
+    Main obj=new Main();
+    
+    int c=10;
+    int d=20;
+     
+     obj.credit(c,d);
+     
+     System.out.println(c);
+     System.out.println(obj.a +obj.b);
+ 
+        }
+   public  void credit(int e,int f){
+int c= e+f;
+System.out.println(c);
+   }
+    
+    
+
+}

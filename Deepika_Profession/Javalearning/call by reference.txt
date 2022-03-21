@@ -1,0 +1,61 @@
+public class Main{
+    int balance;
+   public static void main(String[] args){
+      Main deep=new Main();
+      deep.balance=0;
+      System.out.println("balance Before credit" + " " +deep.balance);
+      credit(deep);
+      System.out.println("balance after credit" + " " +deep.balance);
+      
+      System.out.println("balance Before debit" + " " +deep.balance);
+      debit(deep);
+            System.out.println("balance after debit" + " " +deep.balance);
+
+System.out.println(deep.balance);
+        }
+   public static void credit(Main m) {
+m.balance=m.balance+1000;
+   }
+    
+    public static void debit(Main m) {
+m.balance=m.balance-100;    }
+
+}
+
+
+It is supported for inheritance concept also.the object created for child class can access parent variables also.hence call by value and reference 
+works in inhertance
+class parent{
+    int s=100;
+}
+
+public class Main extends parent{
+    int balance;
+   public static void main(String[] args){
+      Main deep=new Main();
+      deep.balance=0;
+      System.out.println("balance Before credit" + " " +deep.balance);
+      credit(deep);
+      System.out.println("balance after credit" + " " +deep.balance);
+      
+      System.out.println("balance Before debit" + " " +deep.balance);
+      debit(deep);
+            System.out.println("balance after debit" + " " +deep.balance);
+             System.out.println("balance after debit" + " " +deep.s);
+
+System.out.println(deep.balance);
+        }
+   public static void credit(Main m) {
+          System.out.println(m.s);
+m.balance=m.balance+1000;
+m.s=m.balance+100000;
+   }
+    
+    public static void debit(Main m) {
+m.balance=m.balance-100;    }
+
+}
+
+
+
+

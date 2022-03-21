@@ -1,0 +1,35 @@
+Interface Concept: ( Refer Javatpoint,tutorials point)
+
+Interface with float return
+
+interface Bank{  
+float rateOfInterest();  
+}  
+class SBI implements Bank{  
+public float rateOfInterest(){return 9.15f;}  
+}  
+class PNB implements Bank{  
+public float rateOfInterest(){return 9.7f;}  
+}  
+class Main{  
+public static void main(String[] args){  
+Bank b=new SBI();  
+System.out.println("ROI: "+b.rateOfInterest());  
+}}  
+
+Interface with static menthod:
+
+interface Drawable{  
+void draw();  
+static int cube(int x){return x*x*x;}  
+}  
+class Rectangle implements Drawable{  
+public void draw(){System.out.println("drawing rectangle");}  
+}  
+  
+class TestInterfaceStatic{  
+public static void main(String args[]){  
+Drawable d=new Rectangle();  
+d.draw();  
+System.out.println(Drawable.cube(3));  
+}}  

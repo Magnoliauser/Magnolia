@@ -1,0 +1,67 @@
+Call by value: In 2 classes ( create object)
+class test{
+    
+    void test(int x){
+    int abc=x+1000;
+    System.out.println(abc); 
+}}
+
+public class Main {
+
+    public static void main(String[] args){ 
+
+		int a =10 ;
+		int b=20;
+    	Main obj=new Main();  
+    //	test obj1=new test();   ststic method hence create an object and call the method
+
+       obj.takeSnapShot(a,b) ;     
+      // obj1.test(a) ;     
+
+
+    }
+
+ void takeSnapShot(int x, int y) {
+int c=x+100;
+       int d=y+100;
+       System.out.println("C is" +c+ "  "+"D is"+d); 
+       test obj1=new test();  //method is in other class.hence object is created
+       obj1.test(c) ;
+
+    }
+
+}
+
+Call by value: Inheritance concept
+
+class test{
+    
+    void test(int x){
+    int abc=x+1000;
+    System.out.println(abc); 
+}}
+
+public class Main extends test {
+
+    public static void main(String[] args){ 
+
+		int a =10 ;
+		int b=20;
+    	Main obj=new Main();  
+    	
+
+       obj.takeSnapShot(a,b) ;     
+         
+
+
+    }
+
+ void takeSnapShot(int x, int y) {
+int c=x+100; //
+       int d=y+100;
+       System.out.println("C is" +c+ "  "+"D is"+d); 
+       test(c)
+
+    }
+
+}

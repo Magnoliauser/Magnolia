@@ -1,0 +1,82 @@
+Constructor only display default value .Not the variables
+
+public class Main {
+
+    public static void main(String[] args){ 
+          boolean c=true;
+           boolean f;   //throw error.Constructor only display default value as zero or null
+          
+		int a ;    //throw error  .This a can be passed to other class by call by value and can be intialized and used there
+		int b=20;
+		System.out.println(c);
+		System.out.println(a);
+		System.out.println(f);
+		
+    	}
+		}
+		
+		NOTE: Return false means it send false
+		
+		
+		
+		class test{
+
+public boolean m1(){
+   boolean result; 
+    int a=10;
+    int b=10;
+    try {
+			if(a==b) {
+				
+				 result = true;
+			
+			}
+				
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		
+		}
+    return result; 
+//boolean return true or false.if a=b it returns true .if a=!b what should it return?. result is there but false is not mentioned
+//boolean should give true or false .
+/* if a=b it returns true .if a=!b you have mentioned return result.but result is variable which is not
+initialzed.bollean should return true or false.*/
+
+
+
+
+
+
+
+when object or constructor is created that object or constructor takes default value as zero or null or false
+
+
+class Main {
+    int a;
+    boolean b;
+    int c;
+    char e;
+    public static void main(String[] args){
+        Main ob=new Main();
+         ob.a=10;
+        // ob.b=true;
+      boolean c;
+          System.out.println(ob.a);
+         System.out.println(ob.b);  //when object is created that object take default value as zero or null or false
+         System.out.println(ob.e);
+        System.out.println(ob.c);
+        ob.m1();
+        m2();
+          }
+    
+    public void m1(){
+        int f;
+        System.out.println(f);
+    }
+    
+    public static void m2(){
+        int w;
+       System.out.println(w); 
+    }
+}

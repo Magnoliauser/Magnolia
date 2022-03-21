@@ -1,0 +1,58 @@
+Constructor: 
+
+class NumberValue {
+   private int num;
+   public NumberValue() {
+      num = 6;
+   }
+   public NumberValue(int n) {
+      num = n;
+   }
+   public void display() {
+      System.out.println("The number is: " + num);
+   }
+}
+public class Demo {
+   public static void main(String[] args) {
+      NumberValue obj1 = new NumberValue();
+      NumberValue obj2 = new NumberValue(15);
+      obj1.display();
+      obj2.display();
+   }
+}
+
+
+class Person{
+   public String name;
+   public int age;
+   public Person(String name, int age){
+      this.name = name;
+      this.age = age;
+   }
+   public void displayPerson() {
+      System.out.println("Data of the Person class: ");
+      System.out.println("Name: "+this.name);
+      System.out.println("Age: "+this.age);
+   }
+}
+public class Main extends Person {
+   public String branch;
+   public int Student_id;
+   public Main(String name, int age, String branch, int Student_id){
+      super(name, age);
+      this.branch = branch;
+      this.Student_id = Student_id;
+   }
+   public void displayStudent() {
+      System.out.println("Data of the Student class: ");
+      System.out.println("Name: "+this.name);
+      System.out.println("Age: "+this.age);
+      System.out.println("Branch: "+this.branch);
+      System.out.println("Student ID: "+this.Student_id);
+   }
+   public static void main(String[] args) {
+      Main person = new Main("Krishna", 20, "IT", 1256);
+      //person.displayPerson();
+      person.displayStudent();
+   }
+}

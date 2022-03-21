@@ -1,0 +1,20 @@
+import java.util.*;  
+class Main{  
+ public static void main(String args[]) {  
+      
+   try{
+       System.out.println("Try");
+  Thread. sleep(3000);
+  System.out.println("Try 2nd");
+   }
+   catch (Exception e){   //// if any exception it will be caught here.it catches the exception.it is holding the exception
+       e.printStackTrace();  ///This is to view the exception(What exception has happened)
+       System.out.println("hi");// exception is caught by catch () so this line will display .
+       
+   }
+ System.out.println("hello");
+ //System.out.println(al.get(1));
+ 
+ }  
+} //Run and check the output .catch block is not executed.because exception not happened
+// Check Exception-compile time(thrown by java while code).This is not an exact exception.it is a warning.it explicity tell there may chance for exception.so handle it by either try catch or throws
