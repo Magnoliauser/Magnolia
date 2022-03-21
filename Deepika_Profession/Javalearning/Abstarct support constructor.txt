@@ -1,4 +1,4 @@
-abstract support constructor:
+Program:
 
 abstract class Bike{  
    Bike(){System.out.println("bike is created");}  
